@@ -1,5 +1,4 @@
 import streamlit as st
-import math
 import os
 
 # إعداد الصفحة
@@ -16,9 +15,6 @@ st.markdown("""
         div[data-testid="stAppViewContainer"] {
             direction: rtl !important;
             text-align: right !important;
-        }
-        div[data-testid="stVerticalBlock"] {
-            direction: rtl !important;
         }
         .main-title {
             text-align: center;
@@ -95,6 +91,7 @@ st.markdown("""
 st.markdown('<div class="main-title">🔥 حاسبة السعرات الحرارية</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">نتائجك الصحية بشكل منظم وواضح 🌿🍊</div>', unsafe_allow_html=True)
 
+
 # ---------- الدوال ----------
 def calculate_bmr(weight, height, age, gender):
     return 10 * weight + 6.25 * height - 5 * age + (5 if gender == "ذكر" else -161)
@@ -136,6 +133,36 @@ def macro_split(calories):
     fat = round((calories * 0.25) / 9)
     return protein, carbs, fat
 
+def suggest_meal_plan(calories, goal):
+    """اقتراح عدد وجبات ونصائح يومية بناءً على الهدف."""
+    if calories <= 1400:
+        base_meals = 3
+    elif calories <= 2000:
+        base_meals = 4
+    elif calories <= 2600:
+        base_meals = 5
+    else:
+        base_meals = 6
+
+    tips = [
+        "احرص على تضمين مصدر بروتين وخضروات في كل وجبة رئيسية.",
+        "قسّم مجموع السعرات بالتساوي على مدار اليوم لتجنب الجوع الحاد."
+    ]
+
+    if goal == "زيادة الوزن":
+        base_meals = min(base_meals + 1, 6)
+        guidance = "اختر وجبات صغيرة ومتكررة مع إضافة سناكات غنية بالبروتين والسعرات."
+        tips.append("استخدم سناك غني بالسعرات مثل المكسرات أو الزبادي الكامل.")
+    elif goal == "خسارة الوزن":
+        guidance = "التزم بوجبات منتظمة وثابتة لتثبيت مستوى الجوع والطاقة."
+        tips.append("اختر سناك خفيف غني بالألياف قبل الشعور بالجوع الشديد.")
+    else:
+        guidance = "حافظ على وجبات متوازنة مع سناك خفيف لدعم الثبات."
+        tips.append("قسّم وجباتك بين بروتين، كربوهيدرات معقدة، ودهون صحية.")
+
+    return {"count": base_meals, "guidance": guidance, "tips": tips}
+
+
 # ---------- إدخال البيانات ----------
 st.subheader("📋 أدخل بياناتك", divider="orange")
 
@@ -160,13 +187,14 @@ if st.button("احسب السعرات 🔥"):
     ideal_weight = calculate_ideal_weight(height, gender)
     ideal_calories = int(calculate_bmr(ideal_weight, height, age, gender) * get_activity_factor(activity))
     protein, carbs, fat = macro_split(calories)
+    meal_plan = suggest_meal_plan(calories, goal)
 
     # نسبة التقدم نحو الوزن المثالي
     progress = min(1.0, max(0.0, ideal_weight / weight))
     percent = int(progress * 100)
     color = "green" if percent >= 95 else ("orange" if percent >= 80 else "red")
 
-    # ---------- النتائج ----------
+    st.markdown("---")
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown(f"""
     <h3>📊 النتائج:</h3>
@@ -174,7 +202,8 @@ if st.button("احسب السعرات 🔥"):
     🔹 <b>معدل الأيض الأساسي (BMR):</b> {bmr:,} سعرة حرارية<br>
     🔹 <b>مؤشر كتلة الجسم (BMI):</b> {bmi}<br>
     🔹 <b>الوزن المثالي:</b> {ideal_weight} كجم<br>
-    🔹 <b>السعرات المقترحة للوزن المثالي:</b> {ideal_calories:,} سعرة حرارية
+    🔹 <b>السعرات المقترحة للوزن المثالي:</b> {ideal_calories:,} سعرة حرارية<br>
+    🔹 <b>عدد الوجبات المقترحة:</b> {meal_plan["count"]} وجبات يوميًا
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -197,6 +226,18 @@ if st.button("احسب السعرات 🔥"):
     🧈 <b>دهون:</b> {fat} جم
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
+
+    # ---------- توجيهات الوجبات ----------
+    meal_guidance_html = [
+        "<div class='macro-card'>",
+        "<h4>🍽️ توجيهات الوجبات اليومية:</h4>",
+        f"<p>{meal_plan['guidance']}</p>",
+        "<ul>",
+        *[f"<li>{tip}</li>" for tip in meal_plan["tips"]],
+        "</ul>",
+        "</div>",
+    ]
+    st.markdown("".join(meal_guidance_html), unsafe_allow_html=True)
 
     # ---------- التوصيات ----------
     st.markdown("""
