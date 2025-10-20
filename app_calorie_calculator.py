@@ -3,7 +3,7 @@ import math
 import os
 
 # إعداد الصفحة
-st.set_page_config(page_title="Diet Plus 🔥", layout="centered")
+st.set_page_config(page_title="حاسبة السعرات - Diet Plus", layout="centered")
 
 # ---------- CSS للتصميم ----------
 st.markdown("""
@@ -38,16 +38,18 @@ st.markdown("""
         }
         .main-title {
             text-align: center;
-            font-size: 42px;
+            font-size: 38px;
             color: #065f46;
             font-weight: bold;
             margin-top: 90px;
+            direction: rtl;
         }
         .sub-title {
             text-align: center;
             color: #444;
             font-size: 18px;
             margin-bottom: 25px;
+            direction: rtl;
         }
         .stButton>button {
             background-color: #f97316;
@@ -62,11 +64,15 @@ st.markdown("""
         .stButton>button:hover {
             background-color: #fb923c;
         }
-        .metric-container {
+        .result-box {
             background-color: rgba(255,255,255,0.9);
             padding: 20px;
             border-radius: 15px;
+            direction: rtl;
+            text-align: right;
             box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+            font-size: 18px;
+            line-height: 1.8;
         }
         .tip-box {
             background-color: #ecfdf5;
@@ -99,15 +105,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------- رأس الصفحة ----------
-st.image("logo deit_final-1.png", width=200)
-st.markdown('<div class="main-title" id="home">Diet Plus 🔥</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">حاسبة السعرات وكتلة الجسم بألوان الصحة والطاقة 🌿🍊</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title" id="home">🔥 حاسبة السعرات الحرارية</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">تعرّف على احتياجك اليومي من الطاقة والماكروز والوزن المثالي 🌿🍊</div>', unsafe_allow_html=True)
 
 # ---------- الدوال ----------
-def calculate_bmr(weight: float, height: float, age: int, gender: str) -> float:
+def calculate_bmr(weight, height, age, gender):
     return 10 * weight + 6.25 * height - 5 * age + (5 if gender == "ذكر" else -161)
 
-def get_activity_factor(level: str) -> float:
+def get_activity_factor(level):
     levels = {
         "خامل (بدون نشاط)": 1.2,
         "نشاط خفيف (1-3 أيام/أسبوع)": 1.375,
@@ -145,7 +150,7 @@ def macro_split(calories):
     return protein, carbs, fat
 
 # ---------- إدخال البيانات ----------
-st.subheader("🧮 أدخل بياناتك")
+st.subheader("🧮 أدخل بياناتك", divider="orange")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -170,28 +175,21 @@ if st.button("احسب السعرات 🔥"):
     protein, carbs, fat = macro_split(calories)
 
     st.markdown("---")
-    st.subheader("📊 النتائج المتكاملة")
-
+    st.markdown("<div class='result-box'>", unsafe_allow_html=True)
     st.markdown(f"""
-    ### 🔹 السعرات الحالية المطلوبة: **{calories:,} سعرة حرارية**
-    ### 🔹 السعرات للوزن المثالي: **{ideal_calories:,} سعرة حرارية**
-    ### 🧍‍♂️ مؤشر كتلة الجسم (BMI): **{bmi}**
-    ### ⚖️ الوزن المثالي: **{ideal_weight} كجم**
-    """)
-    
-    st.markdown("---")
-    st.subheader("🍎 توزيع الماكروز (Macronutrients)")
-    st.markdown(f"""
-    - 🥩 **بروتين:** {protein} جم  
-    - 🍚 **كربوهيدرات:** {carbs} جم  
-    - 🧈 **دهون:** {fat} جم  
-    """)
+    <h3>📊 النتائج:</h3>
+    🔹 <b>السعرات الحرارية الحالية:</b> {calories:,} سعرة حرارية<br>
+    🔹 <b>معدل الأيض الأساسي (BMR):</b> {bmr:,} سعرة حرارية<br>
+    🔹 <b>مؤشر كتلة الجسم (BMI):</b> {bmi}<br>
+    🔹 <b>الوزن المثالي:</b> {ideal_weight} كجم<br>
+    🔹 <b>السعرات الحرارية المقترحة للوزن المثالي:</b> {ideal_calories:,} سعرة حرارية<br><br>
 
-    st.markdown("---")
-    st.markdown(
-        "<div class='metric-container'><b>💡 نصيحة:</b> استخدم هذه القيم كمرجع وحدث بياناتك أسبوعيًا لمتابعة التقدم!</div>",
-        unsafe_allow_html=True
-    )
+    <h4>🥦 توزيع الماكروز اليومية:</h4>
+    🥩 <b>بروتين:</b> {protein} جم<br>
+    🍚 <b>كربوهيدرات:</b> {carbs} جم<br>
+    🧈 <b>دهون:</b> {fat} جم
+    """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # ---------- قسم النصائح ----------
     st.markdown("""
@@ -217,3 +215,5 @@ if st.button("احسب السعرات 🔥"):
                 file_name="SugarGuideMain.pdf",
                 mime="application/pdf"
             )
+    else:
+        st.warning("⚠️ لم يتم العثور على ملف الدليل 'SugarGuideMain.pdf'. يرجى رفعه في نفس مجلد التطبيق.")
