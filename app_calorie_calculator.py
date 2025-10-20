@@ -16,7 +16,7 @@ BORDER_SOFT = "0px 10px 30px rgba(2,8,23,0.08)"
 # ---------- Assets (Banner) ----------
 # يمكنك تغيير الرابط لصور أخرى من Unsplash/Pexels
 BANNER_URL = "https://modo3.com/thumbs/fit630x300/118178/1472070100/%D8%A8%D8%AD%D8%AB_%D8%B9%D9%86_%D8%A7%D9%84%D8%B1%D9%8A%D8%A7%D8%B6%D8%A9_%D9%88%D8%A7%D9%84%D8%B5%D8%AD%D8%A9.jpg"   # وجبة صحية متوازنة
-ATHLETE_URL = "https://images.unsplash.com/photo-1599058917212-d750089bc07c?q=80&w=1600&auto=format&fit=crop"  # شخص يمارس الجري في الخارج
+ATHLETE_URL = "https://cdn.sotor.com/thumbs/fit630x300/54945/1639379662/%D8%AA%D8%B9%D8%A8%D9%8A%D8%B1_%D9%83%D8%AA%D8%A7%D8%A8%D9%8A_%D8%B9%D9%86_%D8%A7%D9%84%D8%B5%D8%AD%D8%A9_%D9%88%D8%A7%D9%84%D8%B1%D9%8A%D8%A7%D8%B6%D8%A9_%D9%88%D8%A7%D9%84%D8%B9%D9%84%D8%A7%D9%82%D8%A9_%D8%A8%D9%8A%D9%86%D9%87%D9%85%D8%A7.jpg"  # شخص يمارس الجري في الخارج
 
 
 # ---------- Global CSS (RTL + Glass + Banner) ----------
