@@ -321,36 +321,6 @@ if calc:
     """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
   
-import numpy as np
-import matplotlib.pyplot as plt
-
-st.markdown("<h4 style='text-align:center;color:#16a34a;margin-top:1.5rem;'>🥦 التغذية لأجل حياة صحية</h4>", unsafe_allow_html=True)
-
-# --- إعداد بيانات المنحنى ---
-x = np.linspace(0, 10, 100)
-y = np.interp(x, [0, 10], [weight, iw])
-
-fig, ax = plt.subplots(figsize=(6, 3))
-ax.set_xlim(0, 10)
-ax.set_ylim(min(y) - 3, max(y) + 3)
-ax.axis("off")
-
-# --- رسم المنحنى بتدرج لوني ---
-for i in range(len(x) - 1):
-    color = "#16a34a" if y[i] > iw + 2 else "#f97316" if abs(y[i] - iw) <= 2 else "#ef4444"
-    ax.plot(x[i:i + 2], y[i:i + 2], color=color, linewidth=4)
-
-# --- نقاط البداية والنهاية ---
-ax.scatter(x[0], y[0], color="#16a34a", s=150, zorder=5)
-ax.scatter(x[-1], y[-1], color="#f97316", s=150, zorder=5)
-
-# --- فقاعات الوزن ---
-ax.text(x[0], y[0] + 0.8, f"{weight:.1f} كجم 🔥", fontsize=11, color="white",
-        bbox=dict(facecolor="#16a34a", boxstyle="round,pad=0.4", edgecolor="none"))
-ax.text(x[-1], y[-1] - 0.8, f"{iw:.1f} كجم 🎯", fontsize=11, color="white",
-        bbox=dict(facecolor="#f97316", boxstyle="round,pad=0.4", edgecolor="none"))
-st.pyplot(fig)
-  
     # Macros
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("### 🥦 توزيع الماكروز اليومية", unsafe_allow_html=True)
