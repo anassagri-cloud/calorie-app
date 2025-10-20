@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 
 # إعداد الصفحة
 st.set_page_config(page_title="Diet Plus 🔥", layout="centered")
@@ -68,10 +69,18 @@ st.markdown("""
         }
         .tip-box {
             background-color: #ecfdf5;
-            border-left: 6px solid #16a34a;
+            border-right: 6px solid #16a34a;
             padding: 20px;
             border-radius: 10px;
             margin-top: 30px;
+            direction: rtl;
+            text-align: right;
+        }
+        .tip-box ul {
+            list-style-type: "✅ ";
+            padding-right: 25px;
+            font-size: 17px;
+            color: #333;
         }
         .block-container {
             background: transparent !important;
@@ -162,7 +171,7 @@ if st.button("احسب السعرات 🔥"):
         unsafe_allow_html=True
     )
 
-    # ---------- قسم النصائح الصحية ----------
+    # ---------- قسم النصائح الصحية RTL ----------
     st.markdown("""
     <div class='tip-box'>
     <h3>📘 توصيات صحية مهمة</h3>
@@ -180,11 +189,14 @@ if st.button("احسب السعرات 🔥"):
     """, unsafe_allow_html=True)
 
     # ---------- زر تحميل PDF ----------
-    with open("SugarGuideMain.pdf", "rb") as pdf_file:
-        st.download_button(
-            label="📥 تحميل دليل السعرات الحرارية (PDF)",
-            data=pdf_file,
-            file_name="SugarGuideMain.pdf",
-            mime="application/pdf",
-            help="اضغط هنا لتحميل الدليل الكامل لخفض الوزن"
-        )
+    if os.path.exists("SugarGuideMain.pdf"):
+        with open("SugarGuideMain.pdf", "rb") as pdf_file:
+            st.download_button(
+                label="📥 تحميل دليل السعرات الحرارية (PDF)",
+                data=pdf_file,
+                file_name="SugarGuideMain.pdf",
+                mime="application/pdf",
+                help="اضغط هنا لتحميل الدليل الكامل لخفض الوزن"
+            )
+    else:
+        st.warning("⚠️ لم يتم العثور على ملف الدليل 'SugarGuideMain.pdf'. يرجى رفعه في نفس مجلد التطبيق.")
