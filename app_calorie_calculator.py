@@ -1,3 +1,4 @@
+st.sidebar.page_link("pages/2_meal_plan_DIETPLUS.py", label="🍱 خطة وجبات يومية")
 import streamlit as st
 
 def calculate_bmr(weight: float, height: float, age: int, gender: str) -> float:
