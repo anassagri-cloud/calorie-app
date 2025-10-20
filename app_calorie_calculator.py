@@ -1,4 +1,105 @@
-tdee = bmr * get_activity_factor(activity)
+import streamlit as st
+import math
+import os
+
+# إعداد الصفحة
+st.set_page_config(page_title="حاسبة السعرات - Diet Plus", layout="centered")
+
+# ---------- CSS ----------
+st.markdown("""
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #fff7ed 100%);
+            background-attachment: fixed;
+        }
+        .main-title {
+            text-align: center;
+            font-size: 38px;
+            color: #065f46;
+            font-weight: bold;
+            margin-top: 90px;
+            direction: rtl;
+        }
+        .sub-title {
+            text-align: center;
+            color: #444;
+            font-size: 18px;
+            margin-bottom: 25px;
+            direction: rtl;
+        }
+        .card {
+            background-color: #ffffffcc;
+            border-right: 6px solid #16a34a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            direction: rtl;
+            text-align: right;
+            font-size: 18px;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+        }
+        .macro-card {
+            background-color: #fefce8;
+            border-right: 6px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            direction: rtl;
+            text-align: right;
+            font-size: 18px;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+        }
+        .tip-box {
+            background-color: #ecfdf5;
+            border-right: 6px solid #16a34a;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            direction: rtl;
+            text-align: right;
+        }
+        .tip-box ul {
+            list-style-type: "✅ ";
+            padding-right: 25px;
+            font-size: 17px;
+            color: #333;
+        }
+        .stButton>button {
+            background-color: #f97316;
+            color: white;
+            font-size: 18px;
+            border-radius: 10px;
+            height: 50px;
+            width: 100%;
+            border: none;
+            font-weight: 600;
+        }
+        .stButton>button:hover {
+            background-color: #fb923c;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# ---------- العنوان ----------
+st.markdown('<div class="main-title">🔥 حاسبة السعرات الحرارية</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">نتائجك الصحية بشكل منظم وواضح 🌿🍊</div>', unsafe_allow_html=True)
+
+# ---------- الدوال ----------
+def calculate_bmr(weight, height, age, gender):
+    return 10 * weight + 6.25 * height - 5 * age + (5 if gender == "ذكر" else -161)
+
+def get_activity_factor(level):
+    levels = {
+        "خامل (بدون نشاط)": 1.2,
+        "نشاط خفيف (1-3 أيام/أسبوع)": 1.375,
+        "نشاط متوسط (3-5 أيام/أسبوع)": 1.55,
+        "نشاط عالي (6-7 أيام/أسبوع)": 1.725,
+        "نشاط شديد جدًا": 1.9
+    }
+    return levels.get(level, 1.2)
+
+def calculate_calories(weight, height, age, gender, activity, goal):
+    bmr = calculate_bmr(weight, height, age, gender)
+    tdee = bmr * get_activity_factor(activity)
     if goal == "خسارة الوزن":
         calories = tdee - 500
     elif goal == "زيادة الوزن":
@@ -22,25 +123,6 @@ def macro_split(calories):
     carbs = round((calories * 0.5) / 4)
     fat = round((calories * 0.25) / 9)
     return protein, carbs, fat
-
-def suggest_meal_count(calories, goal):
-    if calories < 1600:
-        base_meals = 3
-    elif calories < 2200:
-        base_meals = 4
-    else:
-        base_meals = 5
-
-    if goal == "زيادة الوزن":
-        base_meals += 1
-        note = "قسّم السعرات على وجبات أكثر صغيرة لدعم زيادة الوزن الصحية."
-    elif goal == "خسارة الوزن":
-        note = "حافظ على وجبات منتظمة مع وجبة خفيفة صحية بين الوجبات الرئيسية."
-    else:
-        note = "وزع السعرات على وجبات رئيسية متوازنة مع وجبات خفيفة عند الحاجة."
-
-    base_meals = min(max(base_meals, 3), 6)
-    return base_meals, note
 
 # ---------- إدخال البيانات ----------
 st.subheader("🧮 أدخل بياناتك", divider="orange")
@@ -66,7 +148,18 @@ if st.button("احسب السعرات 🔥"):
     ideal_weight = calculate_ideal_weight(height, gender)
     ideal_calories = int(calculate_bmr(ideal_weight, height, age, gender) * get_activity_factor(activity))
     protein, carbs, fat = macro_split(calories)
-    meal_count, meal_note = suggest_meal_count(calories, goal)
+
+    # 🔢 حساب نسبة التقدم للوزن المثالي
+    progress = min(1.0, max(0.0, ideal_weight / weight))
+    percent = int(progress * 100)
+
+    # تحديد لون الشريط
+    if percent >= 95:
+        color = "green"
+    elif percent >= 80:
+        color = "orange"
+    else:
+        color = "red"
 
     st.markdown("---")
     st.markdown("<div class='card'>", unsafe_allow_html=True)
@@ -77,11 +170,20 @@ if st.button("احسب السعرات 🔥"):
     🔹 <b>مؤشر كتلة الجسم (BMI):</b> {bmi}<br>
     🔹 <b>الوزن المثالي:</b> {ideal_weight} كجم<br>
     🔹 <b>السعرات المقترحة للوزن المثالي:</b> {ideal_calories:,} سعرة حرارية
-    🔹 <b>السعرات المقترحة للوزن المثالي:</b> {ideal_calories:,} سعرة حرارية<br>
-    🔹 <b>عدد الوجبات المقترحة:</b> {meal_count} وجبات يوميًا
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
+    # ---------- شريط التقدم ----------
+    st.markdown(f"<h4 style='direction:rtl;text-align:right;'>📈 مدى اقترابك من الوزن المثالي:</h4>", unsafe_allow_html=True)
+    progress_html = f"""
+    <div style='width:100%;background:#e5e7eb;border-radius:10px;height:25px;'>
+        <div style='width:{percent}%;background:{color};height:25px;border-radius:10px;'></div>
+    </div>
+    <p style='text-align:right;direction:rtl;'>النسبة الحالية: {percent}%</p>
+    """
+    st.markdown(progress_html, unsafe_allow_html=True)
+
+    # ---------- الماكروز ----------
     st.markdown("<div class='macro-card'>", unsafe_allow_html=True)
     st.markdown(f"""
     <h4>🥦 توزيع الماكروز اليومية:</h4>
@@ -91,7 +193,7 @@ if st.button("احسب السعرات 🔥"):
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # ---------- قسم التوصيات ----------
+    # ---------- التوصيات ----------
     st.markdown("""
     <div class='tip-box'>
     <h3>📘 توصيات صحية مهمة</h3>
@@ -105,8 +207,6 @@ if st.button("احسب السعرات 🔥"):
     </ul>
     </div>
     """, unsafe_allow_html=True)
-
-    st.info(f"🍽️ نصيحة الوجبات: {meal_note}")
 
     # ---------- زر تحميل PDF ----------
     if os.path.exists("SugarGuideMain.pdf"):
