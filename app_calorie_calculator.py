@@ -5,36 +5,12 @@ import os
 # إعداد الصفحة
 st.set_page_config(page_title="حاسبة السعرات - Diet Plus", layout="centered")
 
-# ---------- CSS للتصميم ----------
+# ---------- CSS ----------
 st.markdown("""
     <style>
         body {
-            background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 40%, #fff7ed 100%);
+            background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #fff7ed 100%);
             background-attachment: fixed;
-        }
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #16a34a;
-            color: white;
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            padding: 12px;
-            font-weight: bold;
-            font-size: 18px;
-            box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
-            z-index: 999;
-        }
-        .navbar a {
-            text-decoration: none;
-            color: white;
-            transition: 0.3s;
-        }
-        .navbar a:hover {
-            color: #f97316;
         }
         .main-title {
             text-align: center;
@@ -51,28 +27,26 @@ st.markdown("""
             margin-bottom: 25px;
             direction: rtl;
         }
-        .stButton>button {
-            background-color: #f97316;
-            color: white;
-            font-size: 18px;
-            border-radius: 10px;
-            height: 50px;
-            width: 100%;
-            border: none;
-            font-weight: 600;
-        }
-        .stButton>button:hover {
-            background-color: #fb923c;
-        }
-        .result-box {
-            background-color: rgba(255,255,255,0.9);
+        .card {
+            background-color: #ffffffcc;
+            border-right: 6px solid #16a34a;
+            border-radius: 12px;
             padding: 20px;
-            border-radius: 15px;
+            margin-bottom: 15px;
             direction: rtl;
             text-align: right;
-            box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
             font-size: 18px;
-            line-height: 1.8;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
+        }
+        .macro-card {
+            background-color: #fefce8;
+            border-right: 6px solid #f59e0b;
+            border-radius: 12px;
+            padding: 20px;
+            direction: rtl;
+            text-align: right;
+            font-size: 18px;
+            box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
         }
         .tip-box {
             background-color: #ecfdf5;
@@ -89,24 +63,25 @@ st.markdown("""
             font-size: 17px;
             color: #333;
         }
-        .block-container {
-            background: transparent !important;
+        .stButton>button {
+            background-color: #f97316;
+            color: white;
+            font-size: 18px;
+            border-radius: 10px;
+            height: 50px;
+            width: 100%;
+            border: none;
+            font-weight: 600;
+        }
+        .stButton>button:hover {
+            background-color: #fb923c;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# ---------- شريط التنقل ----------
-st.markdown("""
-<div class="navbar">
-    <a href="#home">🏠 الصفحة الرئيسية</a>
-    <a href="#meals">🍱 خطة الوجبات</a>
-    <a href="#tracking">📈 متابعة الوزن</a>
-</div>
-""", unsafe_allow_html=True)
-
-# ---------- رأس الصفحة ----------
-st.markdown('<div class="main-title" id="home">🔥 حاسبة السعرات الحرارية</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">تعرّف على احتياجك اليومي من الطاقة والماكروز والوزن المثالي 🌿🍊</div>', unsafe_allow_html=True)
+# ---------- العنوان ----------
+st.markdown('<div class="main-title">🔥 حاسبة السعرات الحرارية</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">نتائجك الصحية بشكل منظم وواضح 🌿🍊</div>', unsafe_allow_html=True)
 
 # ---------- الدوال ----------
 def calculate_bmr(weight, height, age, gender):
@@ -175,15 +150,19 @@ if st.button("احسب السعرات 🔥"):
     protein, carbs, fat = macro_split(calories)
 
     st.markdown("---")
-    st.markdown("<div class='result-box'>", unsafe_allow_html=True)
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown(f"""
     <h3>📊 النتائج:</h3>
     🔹 <b>السعرات الحرارية الحالية:</b> {calories:,} سعرة حرارية<br>
     🔹 <b>معدل الأيض الأساسي (BMR):</b> {bmr:,} سعرة حرارية<br>
     🔹 <b>مؤشر كتلة الجسم (BMI):</b> {bmi}<br>
     🔹 <b>الوزن المثالي:</b> {ideal_weight} كجم<br>
-    🔹 <b>السعرات الحرارية المقترحة للوزن المثالي:</b> {ideal_calories:,} سعرة حرارية<br><br>
+    🔹 <b>السعرات المقترحة للوزن المثالي:</b> {ideal_calories:,} سعرة حرارية
+    """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
+    st.markdown("<div class='macro-card'>", unsafe_allow_html=True)
+    st.markdown(f"""
     <h4>🥦 توزيع الماكروز اليومية:</h4>
     🥩 <b>بروتين:</b> {protein} جم<br>
     🍚 <b>كربوهيدرات:</b> {carbs} جم<br>
@@ -191,17 +170,17 @@ if st.button("احسب السعرات 🔥"):
     """, unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # ---------- قسم النصائح ----------
+    # ---------- قسم التوصيات ----------
     st.markdown("""
     <div class='tip-box'>
     <h3>📘 توصيات صحية مهمة</h3>
     <ul>
-        <li>يتغير احتياجك من السعرات الحرارية بتغير نشاطك البدني أو بتغير وزنك.</li>
+        <li>يتغير احتياجك من السعرات بتغير وزنك أو نشاطك البدني.</li>
         <li>تناول أطعمة صحية قليلة الملح والسكر والدهون.</li>
-        <li>مارس النشاط البدني 150 دقيقة أسبوعيًا من الأنشطة الهوائية معتدلة الشدة.</li>
-        <li>أو 75 دقيقة من الأنشطة الهوائية عالية الشدة أسبوعيًا.</li>
+        <li>مارس النشاط البدني 150 دقيقة أسبوعيًا من الأنشطة المعتدلة (مثل المشي أو السباحة).</li>
+        <li>يمكن الدمج بين النشاط المعتدل والعالي لتحقيق التوازن.</li>
         <li>لزيادة أو إنقاص نصف كجم بالأسبوع، أضف أو احذف 500 سعرة حرارية يوميًا.</li>
-        <li>لزيادة أو إنقاص كيلوجرام واحد بالأسبوع، أضف أو احذف 1000 سعرة حرارية يوميًا.</li>
+        <li>لزيادة أو إنقاص كيلوجرام بالأسبوع، أضف أو احذف 1000 سعرة حرارية يوميًا.</li>
     </ul>
     </div>
     """, unsafe_allow_html=True)
