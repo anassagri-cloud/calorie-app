@@ -1,8 +1,3 @@
-st.markdown(
-    '<link rel="stylesheet" href="style_caloriesmebro.css">',
-    unsafe_allow_html=True
-)
-# file: app_calorie_calculator.py
 import os
 import math
 import streamlit as st
