@@ -1,5 +1,93 @@
 import streamlit as st
 
+# إعداد الصفحة
+st.set_page_config(page_title="Diet Plus 🔥", layout="centered")
+
+# ---------- CSS للتصميم ----------
+st.markdown("""
+    <style>
+        body {
+            background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 40%, #fff7ed 100%);
+            background-attachment: fixed;
+        }
+        /* ===== Navbar ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #16a34a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            padding: 12px;
+            font-weight: bold;
+            font-size: 18px;
+            box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+            z-index: 999;
+        }
+        .navbar a {
+            text-decoration: none;
+            color: white;
+            transition: 0.3s;
+        }
+        .navbar a:hover {
+            color: #f97316;
+        }
+        .main-title {
+            text-align: center;
+            font-size: 42px;
+            color: #065f46;
+            font-weight: bold;
+            margin-top: 90px; /* لتفادي تداخل الشريط */
+        }
+        .sub-title {
+            text-align: center;
+            color: #444;
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+        .stButton>button {
+            background-color: #f97316;
+            color: white;
+            font-size: 18px;
+            border-radius: 10px;
+            height: 50px;
+            width: 100%;
+            border: none;
+            font-weight: 600;
+        }
+        .stButton>button:hover {
+            background-color: #fb923c;
+        }
+        .metric-container {
+            background-color: rgba(255,255,255,0.85);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 2px 10px rgba(0,0,0,0.08);
+        }
+        .block-container {
+            background: transparent !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# ---------- شريط التنقل ----------
+st.markdown("""
+<div class="navbar">
+    <a href="#home">🏠 الصفحة الرئيسية</a>
+    <a href="#meals">🍱 خطة الوجبات</a>
+    <a href="#tracking">📈 متابعة الوزن</a>
+</div>
+""", unsafe_allow_html=True)
+
+# ---------- رأس الصفحة ----------
+st.image("logo deit_final-1.png", width=200)
+st.markdown('<div class="main-title" id="home">Diet Plus 🔥</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">حاسبة السعرات الحرارية اليومية بألوان الصحة والطاقة 🌿🍊</div>', unsafe_allow_html=True)
+
+# ---------- دوال الحساب ----------
 def calculate_bmr(weight: float, height: float, age: int, gender: str) -> float:
     if gender == "ذكر":
         return 10 * weight + 6.25 * height - 5 * age + 5
@@ -27,23 +115,10 @@ def calculate_calories(weight, height, age, gender, activity, goal):
         calories = tdee + 500
     else:
         calories = tdee
+    return round(calories, 2), round(bmr, 2), round(tdee, 2)
 
-    protein = (calories * 0.3) / 4
-    carbs = (calories * 0.4) / 4
-    fats = (calories * 0.3) / 9
-
-    return {
-        "BMR": round(bmr, 2),
-        "TDEE": round(tdee, 2),
-        "Calories": round(calories, 2),
-        "Protein (g)": round(protein, 1),
-        "Carbs (g)": round(carbs, 1),
-        "Fats (g)": round(fats, 1)
-    }
-
-st.set_page_config(page_title="🔥 حاسبة السعرات الحرارية", layout="centered")
-st.title("🔥 حاسبة السعرات الحرارية اليومية")
-st.markdown("احسب احتياجك اليومي من السعرات بناءً على وزنك، طولك، عمرك، ونشاطك.")
+# ---------- إدخال البيانات ----------
+st.subheader("🧮 أدخل بياناتك")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -59,20 +134,32 @@ with col2:
     )
     goal = st.radio("الهدف", ["خسارة الوزن", "ثبات الوزن", "زيادة الوزن"])
 
+# ---------- الحساب ----------
 if st.button("احسب السعرات 🔥"):
-    result = calculate_calories(weight, height, age, gender, activity, goal)
-
-    st.subheader("🔹 النتائج:")
-    st.write(f"**معدل الأيض الأساسي (BMR):** {result['BMR']} سعرة")
-    st.write(f"**السعرات اليومية (TDEE):** {result['TDEE']} سعرة")
-    st.write(f"**السعرات المطلوبة لهدفك:** {result['Calories']} سعرة")
+    calories, bmr, tdee = calculate_calories(weight, height, age, gender, activity, goal)
 
     st.markdown("---")
-    st.subheader("🍽️ توزيع الماكروز:")
+    st.subheader("📊 النتائج")
+
     col1, col2, col3 = st.columns(3)
-    col1.metric("بروتين (غرام)", result["Protein (g)"])
-    col2.metric("كربوهيدرات (غرام)", result["Carbs (g)"])
-    col3.metric("دهون (غرام)", result["Fats (g)"])
+    with col1:
+        st.metric(label="BMR", value=f"{bmr}")
+    with col2:
+        st.metric(label="TDEE", value=f"{tdee}")
+    with col3:
+        st.metric(label="السعرات المطلوبة", value=f"{calories}")
 
     st.markdown("---")
-    st.info("💡 نصيحة: يمكنك تعديل الأهداف أسبوعيًا حسب تطور وزنك.")
+    st.markdown(
+        "<div class='metric-container'><b>💡 نصيحة:</b> حافظ على طاقتك وتوازن صحتك بالأكل المتنوع والنشاط المستمر 🌿🍊</div>",
+        unsafe_allow_html=True
+    )
+
+# ---------- أقسام إضافية ----------
+st.markdown('<div id="meals"></div>', unsafe_allow_html=True)
+st.header("🍱 خطة الوجبات")
+st.info("سيتم لاحقًا ربط هذا القسم بملف DIETPLUS Excel لاقتراح وجبات تلقائية.")
+
+st.markdown('<div id="tracking"></div>', unsafe_allow_html=True)
+st.header("📈 متابعة الوزن")
+st.info("قريبًا: قسم لتتبع الوزن الأسبوعي وعرضه في رسم بياني تفاعلي.")
