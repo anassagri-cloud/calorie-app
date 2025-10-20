@@ -1,4 +1,5 @@
 import streamlit as st
+import math
 import os
 
 # إعداد الصفحة
@@ -100,16 +101,11 @@ st.markdown("""
 # ---------- رأس الصفحة ----------
 st.image("logo deit_final-1.png", width=200)
 st.markdown('<div class="main-title" id="home">Diet Plus 🔥</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">حاسبة السعرات الحرارية اليومية بألوان الصحة والطاقة 🌿🍊</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">حاسبة السعرات وكتلة الجسم بألوان الصحة والطاقة 🌿🍊</div>', unsafe_allow_html=True)
 
-# ---------- دوال الحساب ----------
+# ---------- الدوال ----------
 def calculate_bmr(weight: float, height: float, age: int, gender: str) -> float:
-    if gender == "ذكر":
-        return 10 * weight + 6.25 * height - 5 * age + 5
-    elif gender == "أنثى":
-        return 10 * weight + 6.25 * height - 5 * age - 161
-    else:
-        return 0
+    return 10 * weight + 6.25 * height - 5 * age + (5 if gender == "ذكر" else -161)
 
 def get_activity_factor(level: str) -> float:
     levels = {
@@ -130,7 +126,23 @@ def calculate_calories(weight, height, age, gender, activity, goal):
         calories = tdee + 500
     else:
         calories = tdee
-    return round(calories, 2), round(bmr, 2), round(tdee, 2)
+    return round(calories), round(bmr), round(tdee)
+
+def calculate_bmi(weight, height):
+    h_m = height / 100
+    return round(weight / (h_m ** 2), 1)
+
+def calculate_ideal_weight(height, gender):
+    if gender == "ذكر":
+        return round(50 + 0.9 * (height - 152), 1)
+    else:
+        return round(45.5 + 0.9 * (height - 152), 1)
+
+def macro_split(calories):
+    protein = round((calories * 0.25) / 4)
+    carbs = round((calories * 0.5) / 4)
+    fat = round((calories * 0.25) / 9)
+    return protein, carbs, fat
 
 # ---------- إدخال البيانات ----------
 st.subheader("🧮 أدخل بياناتك")
@@ -152,39 +164,47 @@ with col2:
 # ---------- الحساب ----------
 if st.button("احسب السعرات 🔥"):
     calories, bmr, tdee = calculate_calories(weight, height, age, gender, activity, goal)
+    bmi = calculate_bmi(weight, height)
+    ideal_weight = calculate_ideal_weight(height, gender)
+    ideal_calories = int(calculate_bmr(ideal_weight, height, age, gender) * get_activity_factor(activity))
+    protein, carbs, fat = macro_split(calories)
 
     st.markdown("---")
-    st.subheader("📊 النتائج")
+    st.subheader("📊 النتائج المتكاملة")
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric(label="BMR", value=f"{bmr}")
-    with col2:
-        st.metric(label="TDEE", value=f"{tdee}")
-    with col3:
-        st.metric(label="السعرات المطلوبة", value=f"{calories}")
+    st.markdown(f"""
+    ### 🔹 السعرات الحالية المطلوبة: **{calories:,} سعرة حرارية**
+    ### 🔹 السعرات للوزن المثالي: **{ideal_calories:,} سعرة حرارية**
+    ### 🧍‍♂️ مؤشر كتلة الجسم (BMI): **{bmi}**
+    ### ⚖️ الوزن المثالي: **{ideal_weight} كجم**
+    """)
+    
+    st.markdown("---")
+    st.subheader("🍎 توزيع الماكروز (Macronutrients)")
+    st.markdown(f"""
+    - 🥩 **بروتين:** {protein} جم  
+    - 🍚 **كربوهيدرات:** {carbs} جم  
+    - 🧈 **دهون:** {fat} جم  
+    """)
 
     st.markdown("---")
-
     st.markdown(
-        "<div class='metric-container'><b>💡 نصيحة:</b> حافظ على طاقتك وتوازن صحتك بالأكل المتنوع والنشاط المستمر 🌿🍊</div>",
+        "<div class='metric-container'><b>💡 نصيحة:</b> استخدم هذه القيم كمرجع وحدث بياناتك أسبوعيًا لمتابعة التقدم!</div>",
         unsafe_allow_html=True
     )
 
-    # ---------- قسم النصائح الصحية RTL ----------
+    # ---------- قسم النصائح ----------
     st.markdown("""
     <div class='tip-box'>
     <h3>📘 توصيات صحية مهمة</h3>
     <ul>
         <li>يتغير احتياجك من السعرات الحرارية بتغير نشاطك البدني أو بتغير وزنك.</li>
         <li>تناول أطعمة صحية قليلة الملح والسكر والدهون.</li>
-        <li>مارس النشاط البدني 150 دقيقة أسبوعيًا من الأنشطة الهوائية معتدلة الشدة (مثل المشي السريع، الدراجة، السباحة).</li>
-        <li>أو 75 دقيقة من الأنشطة الهوائية عالية الشدة أسبوعيًا (مثل الجري أو كرة القدم).</li>
-        <li>يمكن الدمج بين النشاط المعتدل والعالي لتحقيق التوازن.</li>
+        <li>مارس النشاط البدني 150 دقيقة أسبوعيًا من الأنشطة الهوائية معتدلة الشدة.</li>
+        <li>أو 75 دقيقة من الأنشطة الهوائية عالية الشدة أسبوعيًا.</li>
         <li>لزيادة أو إنقاص نصف كجم بالأسبوع، أضف أو احذف 500 سعرة حرارية يوميًا.</li>
         <li>لزيادة أو إنقاص كيلوجرام واحد بالأسبوع، أضف أو احذف 1000 سعرة حرارية يوميًا.</li>
     </ul>
-    <p><b>📎 للحصول على دليل السعرات الحرارية لخفض الوزن:</b></p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -195,8 +215,5 @@ if st.button("احسب السعرات 🔥"):
                 label="📥 تحميل دليل السعرات الحرارية (PDF)",
                 data=pdf_file,
                 file_name="SugarGuideMain.pdf",
-                mime="application/pdf",
-                help="اضغط هنا لتحميل الدليل الكامل لخفض الوزن"
+                mime="application/pdf"
             )
-    else:
-        st.warning("⚠️ لم يتم العثور على ملف الدليل 'SugarGuideMain.pdf'. يرجى رفعه في نفس مجلد التطبيق.")
