@@ -11,6 +11,14 @@ st.markdown("""
         body {
             background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #fff7ed 100%);
             background-attachment: fixed;
+            direction: rtl !important;
+        }
+        div[data-testid="stAppViewContainer"] {
+            direction: rtl !important;
+            text-align: right !important;
+        }
+        div[data-testid="stVerticalBlock"] {
+            direction: rtl !important;
         }
         .main-title {
             text-align: center;
@@ -76,6 +84,10 @@ st.markdown("""
         .stButton>button:hover {
             background-color: #fb923c;
         }
+        input, select, textarea, label {
+            direction: rtl !important;
+            text-align: right !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -125,7 +137,7 @@ def macro_split(calories):
     return protein, carbs, fat
 
 # ---------- إدخال البيانات ----------
-st.subheader("🧮 أدخل بياناتك", divider="orange")
+st.subheader("📋 أدخل بياناتك", divider="orange")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -135,7 +147,7 @@ with col1:
 with col2:
     age = st.number_input("العمر", 10, 80, 25)
     activity = st.selectbox(
-        "مستوى النشاط",
+        "مستوى النشاط البدني",
         ["خامل (بدون نشاط)", "نشاط خفيف (1-3 أيام/أسبوع)", "نشاط متوسط (3-5 أيام/أسبوع)",
          "نشاط عالي (6-7 أيام/أسبوع)", "نشاط شديد جدًا"]
     )
@@ -149,19 +161,12 @@ if st.button("احسب السعرات 🔥"):
     ideal_calories = int(calculate_bmr(ideal_weight, height, age, gender) * get_activity_factor(activity))
     protein, carbs, fat = macro_split(calories)
 
-    # 🔢 حساب نسبة التقدم للوزن المثالي
+    # نسبة التقدم نحو الوزن المثالي
     progress = min(1.0, max(0.0, ideal_weight / weight))
     percent = int(progress * 100)
+    color = "green" if percent >= 95 else ("orange" if percent >= 80 else "red")
 
-    # تحديد لون الشريط
-    if percent >= 95:
-        color = "green"
-    elif percent >= 80:
-        color = "orange"
-    else:
-        color = "red"
-
-    st.markdown("---")
+    # ---------- النتائج ----------
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown(f"""
     <h3>📊 النتائج:</h3>
@@ -174,12 +179,12 @@ if st.button("احسب السعرات 🔥"):
     st.markdown("</div>", unsafe_allow_html=True)
 
     # ---------- شريط التقدم ----------
-    st.markdown(f"<h4 style='direction:rtl;text-align:right;'>📈 مدى اقترابك من الوزن المثالي:</h4>", unsafe_allow_html=True)
+    st.markdown("<h4>📈 مدى اقترابك من الوزن المثالي:</h4>", unsafe_allow_html=True)
     progress_html = f"""
     <div style='width:100%;background:#e5e7eb;border-radius:10px;height:25px;'>
         <div style='width:{percent}%;background:{color};height:25px;border-radius:10px;'></div>
     </div>
-    <p style='text-align:right;direction:rtl;'>النسبة الحالية: {percent}%</p>
+    <p style='text-align:right;'>النسبة الحالية: {percent}%</p>
     """
     st.markdown(progress_html, unsafe_allow_html=True)
 
@@ -200,7 +205,7 @@ if st.button("احسب السعرات 🔥"):
     <ul>
         <li>يتغير احتياجك من السعرات بتغير وزنك أو نشاطك البدني.</li>
         <li>تناول أطعمة صحية قليلة الملح والسكر والدهون.</li>
-        <li>مارس النشاط البدني 150 دقيقة أسبوعيًا من الأنشطة المعتدلة (مثل المشي أو السباحة).</li>
+        <li>مارس النشاط البدني 150 دقيقة أسبوعيًا من الأنشطة المعتدلة.</li>
         <li>يمكن الدمج بين النشاط المعتدل والعالي لتحقيق التوازن.</li>
         <li>لزيادة أو إنقاص نصف كجم بالأسبوع، أضف أو احذف 500 سعرة حرارية يوميًا.</li>
         <li>لزيادة أو إنقاص كيلوجرام بالأسبوع، أضف أو احذف 1000 سعرة حرارية يوميًا.</li>
@@ -208,7 +213,7 @@ if st.button("احسب السعرات 🔥"):
     </div>
     """, unsafe_allow_html=True)
 
-    # ---------- زر تحميل PDF ----------
+    # ---------- تحميل PDF ----------
     if os.path.exists("SugarGuideMain.pdf"):
         with open("SugarGuideMain.pdf", "rb") as pdf_file:
             st.download_button(
