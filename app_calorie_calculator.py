@@ -15,8 +15,9 @@ BORDER_SOFT = "0px 10px 30px rgba(2,8,23,0.08)"
 
 # ---------- Assets (Banner) ----------
 # يمكنك تغيير الرابط لصور أخرى من Unsplash/Pexels
-BANNER_URL = "https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1600&auto=format&fit=crop"  # وجبة
-ATHLETE_URL = "https://images.unsplash.com/photo-1518314916381-77a37c2a49ae?q=80&w=1600&auto=format&fit=crop"  # رياضة
+BANNER_URL = "https://images.unsplash.com/photo-1579758629934-095eddd2d6f4?q=80&w=1600&auto=format&fit=crop"   # وجبة صحية متوازنة
+ATHLETE_URL = "https://images.unsplash.com/photo-1599058917212-d750089bc07c?q=80&w=1600&auto=format&fit=crop"  # شخص يمارس الجري في الخارج
+
 
 # ---------- Global CSS (RTL + Glass + Banner) ----------
 st.markdown(f"""
