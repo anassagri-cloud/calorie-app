@@ -1,5 +1,58 @@
 import streamlit as st
 
+# إعداد الصفحة
+st.set_page_config(page_title="Diet Plus 🔥", layout="centered")
+
+# ---------- CSS للتصميم ----------
+st.markdown("""
+    <style>
+        body {
+            background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 40%, #fff7ed 100%);
+            background-attachment: fixed;
+        }
+        .main-title {
+            text-align: center;
+            font-size: 42px;
+            color: #065f46; /* أخضر غامق */
+            font-weight: bold;
+        }
+        .sub-title {
+            text-align: center;
+            color: #444;
+            font-size: 18px;
+            margin-bottom: 25px;
+        }
+        .stButton>button {
+            background-color: #f97316; /* برتقالي فاتح */
+            color: white;
+            font-size: 18px;
+            border-radius: 10px;
+            height: 50px;
+            width: 100%;
+            border: none;
+            font-weight: 600;
+        }
+        .stButton>button:hover {
+            background-color: #fb923c; /* أفتح عند التحريك */
+        }
+        .metric-container {
+            background-color: rgba(255,255,255,0.85);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 2px 10px rgba(0,0,0,0.08);
+        }
+        .block-container {
+            background: transparent !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# ---------- الشعار والعنوان ----------
+st.image("logo deit_final-1.png", width=200)
+st.markdown('<div class="main-title">Diet Plus 🔥</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">حاسبة السعرات الحرارية اليومية بألوان الصحة والطاقة 🌿🍊</div>', unsafe_allow_html=True)
+
+# ---------- دوال الحساب ----------
 def calculate_bmr(weight: float, height: float, age: int, gender: str) -> float:
     if gender == "ذكر":
         return 10 * weight + 6.25 * height - 5 * age + 5
@@ -27,23 +80,10 @@ def calculate_calories(weight, height, age, gender, activity, goal):
         calories = tdee + 500
     else:
         calories = tdee
+    return round(calories, 2), round(bmr, 2), round(tdee, 2)
 
-    protein = (calories * 0.3) / 4
-    carbs = (calories * 0.4) / 4
-    fats = (calories * 0.3) / 9
-
-    return {
-        "BMR": round(bmr, 2),
-        "TDEE": round(tdee, 2),
-        "Calories": round(calories, 2),
-        "Protein (g)": round(protein, 1),
-        "Carbs (g)": round(carbs, 1),
-        "Fats (g)": round(fats, 1)
-    }
-
-st.set_page_config(page_title="🔥 حاسبة السعرات الحرارية", layout="centered")
-st.title("🔥 حاسبة السعرات الحرارية اليومية")
-st.markdown("احسب احتياجك اليومي من السعرات بناءً على وزنك، طولك، عمرك، ونشاطك.")
+# ---------- واجهة الإدخال ----------
+st.subheader("🧮 أدخل بياناتك")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -59,20 +99,22 @@ with col2:
     )
     goal = st.radio("الهدف", ["خسارة الوزن", "ثبات الوزن", "زيادة الوزن"])
 
+# ---------- حساب وإظهار النتائج ----------
 if st.button("احسب السعرات 🔥"):
-    result = calculate_calories(weight, height, age, gender, activity, goal)
-
-    st.subheader("🔹 النتائج:")
-    st.write(f"**معدل الأيض الأساسي (BMR):** {result['BMR']} سعرة")
-    st.write(f"**السعرات اليومية (TDEE):** {result['TDEE']} سعرة")
-    st.write(f"**السعرات المطلوبة لهدفك:** {result['Calories']} سعرة")
-
+    calories, bmr, tdee = calculate_calories(weight, height, age, gender, activity, goal)
     st.markdown("---")
-    st.subheader("🍽️ توزيع الماكروز:")
+    st.subheader("📊 النتائج")
+
     col1, col2, col3 = st.columns(3)
-    col1.metric("بروتين (غرام)", result["Protein (g)"])
-    col2.metric("كربوهيدرات (غرام)", result["Carbs (g)"])
-    col3.metric("دهون (غرام)", result["Fats (g)"])
+    with col1:
+        st.metric(label="BMR", value=f"{bmr}")
+    with col2:
+        st.metric(label="TDEE", value=f"{tdee}")
+    with col3:
+        st.metric(label="السعرات المطلوبة", value=f"{calories}")
 
     st.markdown("---")
-    st.info("💡 نصيحة: يمكنك تعديل الأهداف أسبوعيًا حسب تطور وزنك.")
+    st.markdown(
+        "<div class='metric-container'><b>💡 نصيحة:</b> حافظ على توازن الطاقة اليومية بتناول وجبات صحية ومتنوعة بألوان طبيعية!</div>",
+        unsafe_allow_html=True
+    )
