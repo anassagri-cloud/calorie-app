@@ -4,6 +4,9 @@ import math
 import streamlit as st
 import matplotlib.pyplot as plt
 
+with open("style_caloriesmebro.css") as f:
+    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 # ---------- Page ----------
 st.set_page_config(page_title="حاسبة السعرات - تصميم حديث", layout="centered")
 
