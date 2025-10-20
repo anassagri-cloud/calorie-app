@@ -349,7 +349,6 @@ ax.text(x[0], y[0] + 0.8, f"{weight:.1f} كجم 🔥", fontsize=11, color="white
         bbox=dict(facecolor="#16a34a", boxstyle="round,pad=0.4", edgecolor="none"))
 ax.text(x[-1], y[-1] - 0.8, f"{iw:.1f} كجم 🎯", fontsize=11, color="white",
         bbox=dict(facecolor="#f97316", boxstyle="round,pad=0.4", edgecolor="none"))
-
 st.pyplot(fig)
   
     # Macros
