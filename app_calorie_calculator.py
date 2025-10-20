@@ -320,70 +320,38 @@ if calc:
       </div>
     """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
+  
+import numpy as np
+import matplotlib.pyplot as plt
 
-    import numpy as np
-    import matplotlib.pyplot as plt
-    import matplotlib.animation as animation
-    import time
+st.markdown("<h4 style='text-align:center;color:#16a34a;margin-top:1.5rem;'>🥦 التغذية لأجل حياة صحية</h4>", unsafe_allow_html=True)
 
-    placeholder = st.empty()
-    for opacity in np.linspace(0, 1, 15):
-        placeholder.markdown(
-            f"""
-            <h4 style="
-                text-align:center;
-                direction:rtl;
-                color:rgba(22,163,74,{opacity});
-                font-weight:800;
-                font-family:'Cairo',sans-serif;
-                margin-top:10px;
-                transition:all .3s ease;
-            ">
-            🥦 التغذية لأجل حياة صحية
-            </h4>
-            """,
-            unsafe_allow_html=True
-        )
-        time.sleep(0.03)
+# --- إعداد بيانات المنحنى ---
+x = np.linspace(0, 10, 100)
+y = np.interp(x, [0, 10], [weight, iw])
 
-    frames = 45
-    x = np.linspace(0, 10, 100)
-    y_start = np.full_like(x, weight)
-    y_end = np.interp(x, [0, 10], [weight, iw])
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.set_xlim(0, 10)
+ax.set_ylim(min(y) - 3, max(y) + 3)
+ax.axis("off")
 
-    fig, ax = plt.subplots(figsize=(6, 3))
-    ax.set_xlim(0, 10)
-    ax.set_ylim(min(y_end) - 3, max(y_start) + 3)
-    ax.axis("off")
+# --- رسم المنحنى بتدرج لوني ---
+for i in range(len(x) - 1):
+    color = "#16a34a" if y[i] > iw + 2 else "#f97316" if abs(y[i] - iw) <= 2 else "#ef4444"
+    ax.plot(x[i:i + 2], y[i:i + 2], color=color, linewidth=4)
 
-    line, = ax.plot([], [], lw=4, color="#16a34a")
-    point_start, = ax.plot([], [], 'o', color="#16a34a", markersize=10)
-    point_end, = ax.plot([], [], 'o', color="#f97316", markersize=10)
-    text_start = ax.text(0, 0, "", fontsize=11, color="white", ha="center", va="center",
-                         bbox=dict(facecolor="#16a34a", boxstyle="round,pad=0.4", edgecolor="none"))
-    text_end = ax.text(0, 0, "", fontsize=11, color="white", ha="center", va="center",
-                       bbox=dict(facecolor="#f97316", boxstyle="round,pad=0.4", edgecolor="none"))
+# --- نقاط البداية والنهاية ---
+ax.scatter(x[0], y[0], color="#16a34a", s=150, zorder=5)
+ax.scatter(x[-1], y[-1], color="#f97316", s=150, zorder=5)
 
-    def animate(i):
-        k = i / frames
-        y_current = y_start * (1 - k) + y_end * k
-        line.set_data(x, y_current)
+# --- فقاعات الوزن ---
+ax.text(x[0], y[0] + 0.8, f"{weight:.1f} كجم 🔥", fontsize=11, color="white",
+        bbox=dict(facecolor="#16a34a", boxstyle="round,pad=0.4", edgecolor="none"))
+ax.text(x[-1], y[-1] - 0.8, f"{iw:.1f} كجم 🎯", fontsize=11, color="white",
+        bbox=dict(facecolor="#f97316", boxstyle="round,pad=0.4", edgecolor="none"))
 
-        for j in range(len(x) - 1):
-            color = "#16a34a" if y_current[j] > iw + 2 else "#f97316" if abs(y_current[j] - iw) <= 2 else "#ef4444"
-            ax.plot(x[j:j + 2], y_current[j:j + 2], color=color, linewidth=3)
-
-        point_start.set_data(x[0], y_current[0])
-        point_end.set_data(x[-1], y_current[-1])
-        text_start.set_position((x[0], y_current[0] + 0.8))
-        text_end.set_position((x[-1], y_current[-1] - 0.8))
-        text_start.set_text(f"{weight:.1f} كجم 🔥")
-        text_end.set_text(f"{iw:.1f} كجم 🎯")
-        return line, point_start, point_end, text_start, text_end
-
-    ani = animation.FuncAnimation(fig, animate, frames=frames, interval=90, blit=False, repeat=False)
-    st.pyplot(fig)
-
+st.pyplot(fig)
+  
     # Macros
     st.markdown('<div class="card">', unsafe_allow_html=True)
     st.markdown("### 🥦 توزيع الماكروز اليومية", unsafe_allow_html=True)
