@@ -251,6 +251,56 @@ with col3:
     goal = st.radio("الهدف", ["خسارة الوزن", "ثبات الوزن", "زيادة الوزن"], horizontal=True)
 
 calc = st.button("احسب السعرات 🔥")
+ 
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
+# --- إعداد بيانات المنحنى ---
+frames = 40  # عدد الإطارات للحركة
+x = np.linspace(0, 10, 100)
+y_start = np.full_like(x, weight)
+y_end = np.interp(x, [0, 10], [weight, ideal])
+
+# --- إنشاء الشكل ---
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.set_xlim(0, 10)
+ax.set_ylim(min(y_end)-3, max(y_start)+3)
+ax.axis("off")
+
+line, = ax.plot([], [], lw=4, color="#00C48C")
+point_start, = ax.plot([], [], 'o', color="#00C48C", markersize=10)
+point_end, = ax.plot([], [], 'o', color="#F87171", markersize=10)
+text_start = ax.text(0, 0, "", fontsize=11, color="white", ha="center", va="center",
+                     bbox=dict(facecolor="#00C48C", boxstyle="round,pad=0.4", edgecolor="none"))
+text_end = ax.text(0, 0, "", fontsize=11, color="white", ha="center", va="center",
+                   bbox=dict(facecolor="#F87171", boxstyle="round,pad=0.4", edgecolor="none"))
+
+# --- دالة تحديث الحركة ---
+def animate(i):
+    k = i / frames
+    y_current = y_start * (1 - k) + y_end * k
+    line.set_data(x, y_current)
+
+    # اللون يتغير حسب التقدم
+    for j in range(len(x)-1):
+        color = "#00C48C" if y_current[j] > ideal + 2 else "#FFA84C" if abs(y_current[j]-ideal)<=2 else "#F87171"
+        ax.plot(x[j:j+2], y_current[j:j+2], color=color, linewidth=3)
+
+    point_start.set_data(x[0], y_current[0])
+    point_end.set_data(x[-1], y_current[-1])
+    text_start.set_position((x[0], y_current[0]+0.8))
+    text_end.set_position((x[-1], y_current[-1]-0.8))
+    text_start.set_text(f"{weight:.1f} كجم 🔥")
+    text_end.set_text(f"{ideal:.1f} كجم 🎯")
+    return line, point_start, point_end, text_start, text_end
+
+ani = animation.FuncAnimation(fig, animate, frames=frames, interval=100, blit=False, repeat=False)
+
+# --- عرض العنوان والمنحنى ---
+st.markdown("<h4 style='margin-top:1.5rem;'>📈 مدى اقترابك من الوزن المثالي</h4>", unsafe_allow_html=True)
+st.pyplot(fig)
+st.markdown(f"<p style='text-align:center;color:#6B7280;'>نسبة التقدم نحو الوزن المثالي: <b>{(ideal/weight)*100:.1f}%</b></p>", unsafe_allow_html=True)
 
 # ---------- Compute & Show ----------
 if calc:
