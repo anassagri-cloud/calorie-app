@@ -1,16 +1,16 @@
 import streamlit as st
+import matplotlib.pyplot as plt
 
 # إعداد الصفحة
 st.set_page_config(page_title="Diet Plus 🔥", layout="centered")
 
-# ---------- CSS للتصميم ----------
+# ---------- CSS ----------
 st.markdown("""
     <style>
         body {
             background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 40%, #fff7ed 100%);
             background-attachment: fixed;
         }
-        /* ===== Navbar ===== */
         .navbar {
             position: fixed;
             top: 0;
@@ -40,13 +40,14 @@ st.markdown("""
             font-size: 42px;
             color: #065f46;
             font-weight: bold;
-            margin-top: 90px; /* لتفادي تداخل الشريط */
+            margin-top: 90px;
         }
         .sub-title {
             text-align: center;
             color: #444;
-            font-size: 18px;
+            font-size: 20px;
             margin-bottom: 25px;
+            font-weight: 600;
         }
         .stButton>button {
             background-color: #f97316;
@@ -82,10 +83,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ---------- رأس الصفحة ----------
-st.image("logo deit_final-1.png", width=200)
+# ---------- العنوان ----------
 st.markdown('<div class="main-title" id="home">Diet Plus 🔥</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">حاسبة السعرات الحرارية اليومية بألوان الصحة والطاقة 🌿🍊</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">حاسبة السعرات الحرارية</div>', unsafe_allow_html=True)
 
 # ---------- دوال الحساب ----------
 def calculate_bmr(weight: float, height: float, age: int, gender: str) -> float:
@@ -93,18 +93,17 @@ def calculate_bmr(weight: float, height: float, age: int, gender: str) -> float:
         return 10 * weight + 6.25 * height - 5 * age + 5
     elif gender == "أنثى":
         return 10 * weight + 6.25 * height - 5 * age - 161
-    else:
-        return 0
+    return 0
 
 def get_activity_factor(level: str) -> float:
-    levels = {
+    factors = {
         "خامل (بدون نشاط)": 1.2,
         "نشاط خفيف (1-3 أيام/أسبوع)": 1.375,
         "نشاط متوسط (3-5 أيام/أسبوع)": 1.55,
         "نشاط عالي (6-7 أيام/أسبوع)": 1.725,
         "نشاط شديد جدًا": 1.9
     }
-    return levels.get(level, 1.2)
+    return factors.get(level, 1.2)
 
 def calculate_calories(weight, height, age, gender, activity, goal):
     bmr = calculate_bmr(weight, height, age, gender)
@@ -115,7 +114,13 @@ def calculate_calories(weight, height, age, gender, activity, goal):
         calories = tdee + 500
     else:
         calories = tdee
-    return round(calories, 2), round(bmr, 2), round(tdee, 2)
+
+    # حساب الماكروز
+    protein = (calories * 0.3) / 4
+    carbs = (calories * 0.4) / 4
+    fats = (calories * 0.3) / 9
+
+    return round(calories, 2), round(bmr, 2), round(tdee, 2), round(protein, 1), round(carbs, 1), round(fats, 1)
 
 # ---------- إدخال البيانات ----------
 st.subheader("🧮 أدخل بياناتك")
@@ -134,9 +139,9 @@ with col2:
     )
     goal = st.radio("الهدف", ["خسارة الوزن", "ثبات الوزن", "زيادة الوزن"])
 
-# ---------- الحساب ----------
+# ---------- الحساب والنتائج ----------
 if st.button("احسب السعرات 🔥"):
-    calories, bmr, tdee = calculate_calories(weight, height, age, gender, activity, goal)
+    calories, bmr, tdee, protein, carbs, fats = calculate_calories(weight, height, age, gender, activity, goal)
 
     st.markdown("---")
     st.subheader("📊 النتائج")
@@ -150,16 +155,34 @@ if st.button("احسب السعرات 🔥"):
         st.metric(label="السعرات المطلوبة", value=f"{calories}")
 
     st.markdown("---")
+    st.subheader("🍽️ توزيع الماكروز اليومية")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("🥩 بروتين (غ)", f"{protein}")
+    col2.metric("🍚 كربوهيدرات (غ)", f"{carbs}")
+    col3.metric("🧈 دهون (غ)", f"{fats}")
+
+    # ---------- الرسم البياني ----------
+    st.markdown("### 🎨 توزيع الماكروز (شكل دائري)")
+    fig, ax = plt.subplots()
+    labels = ["بروتين", "كربوهيدرات", "دهون"]
+    values = [protein * 4, carbs * 4, fats * 9]  # نعيد التحويل إلى سعرات
+    colors = ["#16a34a", "#f97316", "#d1d5db"]
+
+    ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
+    ax.axis("equal")
+    st.pyplot(fig)
+
+    st.markdown("---")
     st.markdown(
-        "<div class='metric-container'><b>💡 نصيحة:</b> حافظ على طاقتك وتوازن صحتك بالأكل المتنوع والنشاط المستمر 🌿🍊</div>",
+        "<div class='metric-container'><b>💡 نصيحة:</b> وزّع وجباتك بحيث تحتوي على جميع المكونات الغذائية للحصول على طاقة وصحة مثالية 🌿🍊</div>",
         unsafe_allow_html=True
     )
 
 # ---------- أقسام إضافية ----------
 st.markdown('<div id="meals"></div>', unsafe_allow_html=True)
 st.header("🍱 خطة الوجبات")
-st.info("سيتم لاحقًا ربط هذا القسم بملف DIETPLUS Excel لاقتراح وجبات تلقائية.")
+st.info("قريبًا: سيتم ربط هذا القسم بملف DIETPLUS Excel لاقتراح وجبات مناسبة للسعرات.")
 
 st.markdown('<div id="tracking"></div>', unsafe_allow_html=True)
 st.header("📈 متابعة الوزن")
-st.info("قريبًا: قسم لتتبع الوزن الأسبوعي وعرضه في رسم بياني تفاعلي.")
+st.info("قريبًا: قسم لتسجيل الوزن الأسبوعي وعرضه في رسم بياني تفاعلي.")
